@@ -67,8 +67,7 @@
   .cell-no-photo { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--sage-light); font-family: 'Playfair Display', serif; font-weight: 600; }
   .cell-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(44,44,42,0.72)); padding: 4px 4px 3px; }
   .cell-name { color: white; font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
-  .cell-water-badge { position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; background: var(--sage); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; cursor: pointer; z-index: 2; box-shadow: 0 1px 4px rgba(0,0,0,0.3); transition: transform 0.15s; }
-  .cell-water-badge:active { transform: scale(1.2); background: var(--sage-dark); }
+
   .cell-empty-plus { font-size: 20px; color: var(--sage-light); opacity: 0.5; }
   .drag-mode .cell.occupied { animation: wiggle 0.4s ease infinite alternate; }
   @keyframes wiggle { from { transform: rotate(-1deg); } to { transform: rotate(1deg); } }
@@ -372,13 +371,7 @@ async function buildCell(plant, tIdx) {
   const nameEl = document.createElement('div'); nameEl.className='cell-name'; nameEl.textContent=plant.name;
   overlay.appendChild(nameEl); cell.appendChild(overlay);
 
-  const badge = document.createElement('div'); badge.className='cell-water-badge'; badge.textContent='💧';
-  badge.addEventListener('click', async e => {
-    e.stopPropagation();
-    const result = await recordWater(plant.id);
-    showToast(result === 'already' ? '今天已经浇过水了' : '💧 '+plant.name+' 已浇水');
-  });
-  cell.appendChild(badge);
+
 
   cell.addEventListener('click', () => { if(!dragModeActive[tIdx]) openDetail(plant.id); });
   setupDrag(cell, plant.id, tIdx);
