@@ -61,7 +61,7 @@
   .cell.drag-over { border-color: var(--terracotta) !important; box-shadow: 0 0 0 2px var(--terracotta-light); }
   .cell.dragging { opacity: 0.4; }
   .cell-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .cell-no-photo { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .cell-no-photo { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--sage-light); font-family: 'Playfair Display', serif; font-weight: 600; }
   .cell-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(44,44,42,0.72)); padding: 4px 4px 3px; }
   .cell-name { color: white; font-size: 9px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
   .cell-water-badge { position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; background: var(--sage); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; cursor: pointer; z-index: 2; box-shadow: 0 1px 4px rgba(0,0,0,0.3); transition: transform 0.15s; }
@@ -127,7 +127,7 @@
 <body>
 
 <div class="app-header">
-  <h1>🌵 板栗种植基地</h1>
+  <h1>🌰 板栗种植基地</h1>
 </div>
 
 <div class="tabs">
@@ -255,7 +255,7 @@ async function init() {
   await openDB();
   const all = await dbGetAll('plants');
   all.forEach(p => plants[p.id] = p);
-  if (!all.length) await seed();
+  await seed();
   buildTrayHTML();
   renderAll();
 }
@@ -263,9 +263,12 @@ async function init() {
 async function seed() {
   for (let t = 0; t < 5; t++) {
     for (let s = 0; s < GRID_SIZE; s++) {
-      const p = { id: t+'_'+s, trayIdx: t, slot: s, name: defaultName(t,s), waterLog: [], latestPhotoId: null };
-      plants[p.id] = p;
-      await dbPut('plants', p);
+      const id = t+'_'+s;
+      if (!plants[id]) {
+        const p = { id, trayIdx: t, slot: s, name: defaultName(t,s), waterLog: [], latestPhotoId: null };
+        plants[id] = p;
+        await dbPut('plants', p);
+      }
     }
   }
 }
@@ -339,9 +342,9 @@ async function buildCell(plant, tIdx) {
     try {
       const photo = await dbGet('photos', plant.latestPhotoId);
       if (photo) { const img=document.createElement('img'); img.className='cell-photo'; img.src=photo.dataUrl; cell.appendChild(img); }
-      else addPlaceholder(cell);
-    } catch { addPlaceholder(cell); }
-  } else { addPlaceholder(cell); }
+      else addPlaceholder(cell, plant.slot);
+    } catch { addPlaceholder(cell, plant.slot); }
+  } else { addPlaceholder(cell, plant.slot); }
 
   const overlay = document.createElement('div'); overlay.className='cell-overlay';
   const nameEl = document.createElement('div'); nameEl.className='cell-name'; nameEl.textContent=plant.name;
@@ -360,8 +363,8 @@ async function buildCell(plant, tIdx) {
   return cell;
 }
 
-function addPlaceholder(cell) {
-  const ph=document.createElement('div'); ph.className='cell-no-photo'; ph.textContent='🌵'; cell.appendChild(ph);
+function addPlaceholder(cell, slot) {
+  const ph=document.createElement('div'); ph.className='cell-no-photo'; ph.textContent=slot+1; cell.appendChild(ph);
 }
 
 // ── DRAG ──
